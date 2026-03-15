@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>기업 실적 대시보드 | Financial Dashboard</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+    <script src="data.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header Section -->
+        <header class="dashboard-header">
+            <h1>기업 실적 대시보드</h1>
+            <p>2021년 - 2025년 매출 및 영업이익 현황</p>
+        </header>
+
+        <!-- Dynamic Controls -->
+        <section class="controls-section glass-panel" id="controls-section">
+            <div class="control-group">
+                <label for="company-select">분석할 기업:</label>
+                <select id="company-select">
+                    <!-- Options populated dynamically -->
+                </select>
+            </div>
+            <div class="control-group view-toggle">
+                <button id="btn-chart-view" class="view-btn active">개별 차트</button>
+                <button id="btn-table-view" class="view-btn">전체 기업 표</button>
+            </div>
+        </section>
+
+        <!-- Charts and Metrics -->
+        <section class="chart-section" id="chart-section">
+            <div class="summary-cards" id="summary-cards">
+                <div class="summary-card glass-panel">
+                    <h4 id="label-revenue">최근 연도 매출</h4>
+                    <div class="summary-body">
+                        <div class="summary-amount" id="summary-revenue">0원</div>
+                        <div class="summary-yoy" id="yoy-revenue"></div>
+                    </div>
+                </div>
+                <div class="summary-card glass-panel">
+                    <h4 id="label-profit">최근 연도 영업이익</h4>
+                    <div class="summary-body">
+                        <div class="summary-amount" id="summary-profit">0원</div>
+                        <div class="summary-yoy" id="yoy-profit"></div>
+                    </div>
+                </div>
+                <div class="summary-card glass-panel">
+                    <h4>영업이익률</h4>
+                    <div class="summary-body">
+                        <div class="summary-amount" id="summary-margin">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container glass-panel">
+                <canvas id="financialChart"></canvas>
+            </div>
+        </section>
+
+        <!-- Table View -->
+        <section class="table-section glass-panel" id="table-section" style="display: none;">
+            <div class="table-responsive">
+                <table id="financial-table">
+                    <thead>
+                        <!-- Dynamically filled -->
+                    </thead>
+                    <tbody>
+                        <!-- Dynamically filled -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        
+        <!-- Toast Notification -->
+        <div id="toast" class="toast">데이터를 성공적으로 불러왔습니다.</div>
+    </div>
+    
+    <!-- Application Logic -->
+    <script src="app.js"></script>
+</body>
+</html>
