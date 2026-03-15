@@ -7,22 +7,47 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnTableView = document.getElementById('btn-table-view');
     
     // State
-    const financialData = window.FINANCIAL_DATA || {}; 
+    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRUpubog4ZtVHeIA3Z8W7XJhlaG5izk4tsszrvX15vynQ2Z9SaQ0uq63UjF0Ox36Iok_4kmJGB9txPB/pub?output=csv';
+    let financialData = {}; 
+    let companyDisplayOrder = [];
     let chartInstance = null;
     
     // Initialization
-    if (Object.keys(financialData).length === 0) {
-        showToast('데이터가 없습니다. 하드코딩된 파일(data.js)을 확인해주세요.', true);
-        return;
+    async function init() {
+        try {
+            const result = await fetchAndParseData(CSV_URL);
+            financialData = result.data;
+            companyDisplayOrder = result.companyOrder;
+
+            // Calculate YoY%
+            Object.keys(financialData).forEach(comp => {
+                const years = financialData[comp];
+                if (years['2025'] && years['2024']) {
+                    const v25r = years['2025'].rev;
+                    const v24r = years['2024'].rev;
+                    if (v24r !== 0) years['2025'].rev_yoy = (v25r - v24r) / Math.abs(v24r);
+                    
+                    const v25p = years['2025'].prof;
+                    const v24p = years['2024'].prof;
+                    if (v24p !== 0) years['2025'].prof_yoy = (v25p - v24p) / Math.abs(v24p);
+                }
+            });
+
+            if (Object.keys(financialData).length === 0) {
+                showToast('데이터를 불러오는 중 오류가 발생했거나 데이터가 비어있습니다.', true);
+                return;
+            }
+            
+            populateCompanySelect();
+            updateDashboard();
+            showToast('구글 스프레드시트 데이터를 업데이트했습니다.');
+        } catch (error) {
+            console.error(error);
+            showToast('데이터 로드 실패: ' + error.message, true);
+        }
     }
-    
-    populateCompanySelect();
-    
-    // Set initial dashboard
-    setTimeout(() => {
-        updateDashboard();
-        showToast('데이터를 성공적으로 불러왔습니다.');
-    }, 100);
+
+    init();
 
     // Event Listeners
     companySelect.addEventListener('change', () => {
@@ -34,10 +59,6 @@ document.addEventListener('DOMContentLoaded', () => {
         btnTableView.classList.remove('active');
         chartSection.style.display = 'flex';
         tableSection.style.display = 'none';
-        
-        // Hide company select when in table view? No, keep it visible, but it only affects chart.
-        // Actually, let's keep it visible so they know what it is. Or maybe hide it?
-        // Wait, companySelect disables itself or hides its container? Let's just switch sections.
     });
 
     btnTableView.addEventListener('click', () => {
@@ -45,13 +66,80 @@ document.addEventListener('DOMContentLoaded', () => {
         btnChartView.classList.remove('active');
         chartSection.style.display = 'none';
         tableSection.style.display = 'block';
-        
         renderTable();
     });
     
+    async function fetchAndParseData(url) {
+        const response = await fetch(url);
+        const text = await response.text();
+        const rows = text.split(/\r?\n/).map(row => row.split(','));
+        
+        const data = {};
+        const companyOrder = []; // To preserve original spreadsheet order
+        let lastCompany = null;
+        
+        // Skip header row[0]
+        for (let i = 1; i < rows.length; i++) {
+            const cells = rows[i];
+            if (cells.length < 4) continue;
+            
+            let company = cells[0]?.trim();
+            const year = cells[1]?.trim();
+            const revStr = cells[2]?.trim();
+            const profStr = cells[3]?.trim();
+            
+            if (!company && !year) continue; 
+            
+            if (company) {
+                lastCompany = company;
+                if (!companyOrder.includes(company)) {
+                    companyOrder.push(company);
+                }
+            } else {
+                company = lastCompany;
+            }
+            
+            if (!company || !year) continue;
+            
+            const rev = parseKoreanCurrency(revStr);
+            const prof = parseKoreanCurrency(profStr);
+            
+            if (!data[company]) data[company] = {};
+            data[company][year] = { rev, prof };
+        }
+        
+        // Return both data and the original order
+        return { data, companyOrder };
+    }
+
+    function parseKoreanCurrency(str) {
+        if (!str) return 0;
+        let s = str.replace(/,/g, '');
+        let val = 0;
+        
+        const joMatch = s.match(/(-?\d+(?:\.\d+)?)조/);
+        if (joMatch) val += parseFloat(joMatch[1]) * 1000000000000;
+        
+        const ukMatch = s.match(/(-?\d+(?:\.\d+)?)억/);
+        if (ukMatch) val += parseFloat(ukMatch[1]) * 100000000;
+        
+        const manMatch = s.match(/(-?\d+(?:\.\d+)?)만/);
+        if (manMatch) val += parseFloat(manMatch[1]) * 10000;
+        
+        // If it's a simple number without units
+        if (!joMatch && !ukMatch && !manMatch) {
+            val = parseFloat(s) || 0;
+        }
+
+        if (s.includes('손실')) {
+            val = -Math.abs(val);
+        }
+        
+        return val;
+    }
+
     function formatKoreanCurrency(amount) {
         if (amount === 0) return '0원';
-        
         const isNegative = amount < 0;
         let absVal = Math.abs(amount);
         
@@ -74,9 +162,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function populateCompanySelect() {
         companySelect.innerHTML = '';
-        const companies = Object.keys(financialData).sort();
-        
-        companies.forEach(company => {
+        // No .sort() to keep the spreadsheet order (most recent first)
+        companyDisplayOrder.forEach(company => {
             const option = document.createElement('option');
             option.value = company;
             option.textContent = company;
@@ -87,15 +174,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateDashboard() {
         const company = companySelect.value;
         if (!company || !financialData[company]) return;
-        
         const data = financialData[company];
-        
-        // Collect all available years for this company and sort them
         let years = Object.keys(data).filter(y => y >= '2021' && y <= '2025').sort();
-        if (years.length === 0) {
-            // Fallback to exactly 2021-2025 if missing entirely
-            years = ['2021', '2022', '2023', '2024', '2025'];
-        }
+        if (years.length === 0) years = ['2021', '2022', '2023', '2024', '2025'];
         
         const revenues = years.map(y => data[y] ? data[y].rev : 0);
         const profits = years.map(y => data[y] ? data[y].prof : 0);
@@ -106,33 +187,23 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function updateChart(labels, revenues, profits) {
         const ctx = document.getElementById('financialChart').getContext('2d');
-        
-        // Dynamic Gradient for Revenue Bars
         const revGradient = ctx.createLinearGradient(0, 0, 0, 500);
         revGradient.addColorStop(0, 'rgba(59, 130, 246, 0.9)');
         revGradient.addColorStop(1, 'rgba(59, 130, 246, 0.1)');
-
         const highlightRevGradient = ctx.createLinearGradient(0, 0, 0, 500);
-        highlightRevGradient.addColorStop(0, 'rgba(236, 72, 153, 0.9)'); // Pinkish highlight for 2025
+        highlightRevGradient.addColorStop(0, 'rgba(236, 72, 153, 0.9)'); 
         highlightRevGradient.addColorStop(1, 'rgba(236, 72, 153, 0.1)');
         
         const revColors = labels.map(l => l === '2025' ? highlightRevGradient : revGradient);
         const profColors = labels.map(l => l === '2025' ? '#ec4899' : '#10b981');
         
-        if (chartInstance) {
-            chartInstance.destroy();
-        }
-        
+        if (chartInstance) chartInstance.destroy();
         Chart.defaults.color = '#94a3b8';
         Chart.defaults.font.family = "'Inter', sans-serif";
-        
-        // Register DataLabels
-        if (typeof ChartDataLabels !== 'undefined') {
-            Chart.register(ChartDataLabels);
-        }
+        if (typeof ChartDataLabels !== 'undefined') Chart.register(ChartDataLabels);
         
         chartInstance = new Chart(ctx, {
-            type: 'bar', // Mixed chart
+            type: 'bar',
             data: {
                 labels: labels,
                 datasets: [
@@ -140,7 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         type: 'line',
                         label: '영업이익',
                         data: profits,
-                        borderColor: '#10b981', // line color stays consistent
+                        borderColor: '#10b981',
                         backgroundColor: profColors,
                         borderWidth: 3,
                         pointBackgroundColor: '#0f172a',
@@ -148,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         pointBorderWidth: 3,
                         pointRadius: 6,
                         pointHoverRadius: 8,
-                        tension: 0.4, // smooth curve
+                        tension: 0.4,
                         yAxisID: 'y'
                     },
                     {
@@ -166,107 +237,47 @@ document.addEventListener('DOMContentLoaded', () => {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                interaction: {
-                    mode: 'index',
-                    intersect: false,
-                },
-                layout: {
-                    padding: { top: 30 }
-                },
+                interaction: { mode: 'index', intersect: false },
+                layout: { padding: { top: 30 } },
                 plugins: {
                     datalabels: {
                         anchor: 'end',
                         align: 'end',
-                        color: function(context) {
-                             if (context.dataset.type === 'line') return '#10b981'; // Green for profit
-                             return '#94a3b8'; // grey for rev
-                        },
+                        color: (ctx) => ctx.dataset.type === 'line' ? '#10b981' : '#94a3b8',
                         font: { size: 11, weight: 600 },
-                        formatter: function(value) {
-                            if (value === 0 || value === null) return '';
-                            // To prevent overlap, we might format compactly
-                            const formatted = formatKoreanCurrency(value);
-                            // Strip "원" at the end to save space if desired, or keep it
-                            return formatted;
-                        }
+                        formatter: (val) => val ? formatKoreanCurrency(val) : ''
                     },
-                    legend: {
-                        position: 'top',
-                        labels: {
-                            usePointStyle: true,
-                            padding: 20,
-                            font: { size: 14, weight: 600 }
-                        }
-                    },
+                    legend: { position: 'top', labels: { usePointStyle: true, padding: 20, font: { size: 14, weight: 600 } } },
                     tooltip: {
                         backgroundColor: 'rgba(15, 23, 42, 0.9)',
                         titleColor: '#fff',
                         bodyColor: '#cbd5e1',
-                        borderColor: 'rgba(255,255,255,0.1)',
-                        borderWidth: 1,
                         padding: 12,
                         cornerRadius: 8,
-                        titleFont: { size: 14, weight: 600 },
-                        bodyFont: { size: 13 },
                         callbacks: {
-                            label: function(context) {
-                                let label = context.dataset.label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
-                                if (context.parsed.y !== null) {
-                                    const actualValue = context.parsed.y;
-                                    label += formatKoreanCurrency(actualValue);
-                                }
-                                return label;
-                            }
+                            label: (ctx) => (ctx.dataset.label || '') + ': ' + formatKoreanCurrency(ctx.parsed.y)
                         }
                     }
                 },
                 scales: {
-                    x: {
-                        grid: {
-                            color: 'transparent',
-                            drawBorder: false
-                        },
-                        ticks: {
-                            font: { size: 13 }
-                        }
-                    },
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            color: 'rgba(255, 255, 255, 0.05)',
-                            drawBorder: false
-                        },
-                        ticks: {
-                            callback: function(value) {
-                                return formatKoreanCurrency(value);
-                            },
-                            font: { size: 12 }
-                        }
-                    }
+                    x: { grid: { color: 'transparent' }, ticks: { font: { size: 13 } } },
+                    y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { callback: (val) => formatKoreanCurrency(val), font: { size: 12 } } }
                 }
             }
         });
     }
     
     function updateSummary(years, data) {
-        // Find latest valid year
-        let latestYear = years[years.length - 1];
-        if (!latestYear) latestYear = '2025';
-
+        let latestYear = years[years.length - 1] || '2025';
         const latestData = data[latestYear] || { rev: 0, prof: 0 };
-        
         const revVal = latestData.rev;
         const profVal = latestData.prof;
         const margin = revVal > 0 ? ((profVal / revVal) * 100).toFixed(1) : 0;
         
         document.getElementById('label-revenue').textContent = `${latestYear}년 매출`;
         document.getElementById('label-profit').textContent = `${latestYear}년 영업이익`;
-
-        document.getElementById('summary-revenue').textContent = formatKoreanCurrency(latestData.rev);
-        document.getElementById('summary-profit').textContent = formatKoreanCurrency(latestData.prof);
+        document.getElementById('summary-revenue').textContent = formatKoreanCurrency(revVal);
+        document.getElementById('summary-profit').textContent = formatKoreanCurrency(profVal);
         document.getElementById('summary-margin').textContent = margin + '%';
         
         function updateYoyEl(elId, val) {
@@ -292,46 +303,19 @@ document.addEventListener('DOMContentLoaded', () => {
         updateYoyEl('yoy-revenue', latestData.rev_yoy);
         updateYoyEl('yoy-profit', latestData.prof_yoy);
         
-        // Dynamic coloring for profit amount (loss = red)
         const profEl = document.getElementById('summary-profit');
-        if (profVal < 0) {
-            profEl.style.color = '#ef4444'; // Red
-        } else {
-            profEl.style.color = 'var(--text-color)'; // Standard
-        }
+        profEl.style.color = profVal < 0 ? '#ef4444' : 'var(--text-color)';
     }
     
-    function showToast(message, isError = false) {
-        const toast = document.getElementById('toast');
-        toast.textContent = message;
-        if (isError) {
-            toast.classList.add('error');
-        } else {
-            toast.classList.remove('error');
-        }
-        
-        toast.classList.add('show');
-        setTimeout(() => {
-            toast.classList.remove('show');
-        }, 4000);
-    }
-
     function renderTable() {
         const tableObj = document.getElementById('financial-table');
         const thead = tableObj.querySelector('thead');
         const tbody = tableObj.querySelector('tbody');
-        
-        const companies = Object.keys(financialData).sort();
-        // Determine all available years across all companies
+        const companies = companyDisplayOrder; // Use the preserved order
         const allYearsSet = new Set();
-        companies.forEach(company => {
-            Object.keys(financialData[company]).forEach(y => allYearsSet.add(y));
-        });
-        
+        companies.forEach(c => Object.keys(financialData[c]).forEach(y => allYearsSet.add(y)));
         let years = Array.from(allYearsSet).sort().reverse();
-        if (years.length === 0) years = ['2025', '2024', '2023', '2022', '2021'];
         
-        // Generate Header
         let trHead1 = '<tr><th rowspan="2">기업명</th>';
         let trHead2 = '<tr>';
         years.forEach(y => {
@@ -339,33 +323,31 @@ document.addEventListener('DOMContentLoaded', () => {
             trHead1 += `<th colspan="2" style="text-align: center; border-bottom: 1px solid var(--glass-border);"${hClass}>${y}년</th>`;
             trHead2 += `<th${hClass}>매출</th><th${hClass}>영업이익</th>`;
         });
-        trHead1 += '</tr>';
-        trHead2 += '</tr>';
-        thead.innerHTML = trHead1 + trHead2;
+        thead.innerHTML = trHead1 + '</tr>' + trHead2 + '</tr>';
         
-        // Generate Body
         let trsBody = '';
         companies.forEach(company => {
             const rowData = financialData[company];
             let rowHtml = `<tr><td>${company}</td>`;
-            
             years.forEach(y => {
-                const cellClassBase = y === '2025' ? 'col-highlight' : '';
-                
+                const hClass = y === '2025' ? 'col-highlight' : '';
                 if (rowData[y]) {
-                    const profClass = rowData[y].prof < 0 ? 'profit-neg' : '';
-                    const class1 = cellClassBase;
-                    const class2 = `${cellClassBase} ${profClass}`.trim();
-                    rowHtml += `<td${class1 ? ` class="${class1}"` : ''}>${formatKoreanCurrency(rowData[y].rev)}</td>`;
-                    rowHtml += `<td${class2 ? ` class="${class2}"` : ''}>${formatKoreanCurrency(rowData[y].prof)}</td>`;
+                    const pClass = rowData[y].prof < 0 ? 'profit-neg' : '';
+                    rowHtml += `<td class="${hClass}">${formatKoreanCurrency(rowData[y].rev)}</td>`;
+                    rowHtml += `<td class="${hClass} ${pClass}">${formatKoreanCurrency(rowData[y].prof)}</td>`;
                 } else {
-                    rowHtml += `<td${cellClassBase ? ` class="${cellClassBase}"` : ''}>-</td><td${cellClassBase ? ` class="${cellClassBase}"` : ''}>-</td>`;
+                    rowHtml += `<td class="${hClass}">-</td><td class="${hClass}">-</td>`;
                 }
             });
-            rowHtml += '</tr>';
-            trsBody += rowHtml;
+            trsBody += rowHtml + '</tr>';
         });
-        
         tbody.innerHTML = trsBody;
+    }
+
+    function showToast(message, isError = false) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.className = isError ? 'toast show error' : 'toast show';
+        setTimeout(() => toast.classList.remove('show'), 4000);
     }
 });
