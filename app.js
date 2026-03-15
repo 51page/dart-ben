@@ -7,7 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnTableView = document.getElementById('btn-table-view');
     
     // State
-    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRUpubog4ZtVHeIA3Z8W7XJhlaG5izk4tsszrvX15vynQ2Z9SaQ0uq63UjF0Ox36Iok_4kmJGB9txPB/pub?output=csv';
+    // Adding a timestamp as a cache buster to ensure the latest data is fetched
+    const CSV_BASE_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRUpubog4ZtVHeIA3Z8W7XJhlaG5izk4tsszrvX15vynQ2Z9SaQ0uq63UjF0Ox36Iok_4kmJGB9txPB/pub?output=csv';
     let financialData = {}; 
     let companyDisplayOrder = [];
     let chartInstance = null;
@@ -15,9 +16,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialization
     async function init() {
         try {
-            const result = await fetchAndParseData(CSV_URL);
+            const cacheBuster = `&t=${new Date().getTime()}`;
+            const result = await fetchAndParseData(CSV_BASE_URL + cacheBuster);
             financialData = result.data;
-            companyDisplayOrder = result.companyOrder;
+            // Spread to create a new array then reverse
+            companyDisplayOrder = [...result.companyOrder].reverse(); 
+            
+            console.log('Order:', companyDisplayOrder);
 
             // Calculate YoY%
             Object.keys(financialData).forEach(comp => {
@@ -38,9 +43,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             
-            populateCompanySelect();
-            updateDashboard();
-            showToast('구글 스프레드시트 데이터를 업데이트했습니다.');
+            if (companyDisplayOrder.length > 0) {
+                populateCompanySelect();
+                // Force select the first company (most recent)
+                companySelect.value = companyDisplayOrder[0];
+                updateDashboard();
+                showToast('구글 스프레드시트 데이터를 최신 순으로 로드했습니다.');
+            } else {
+                showToast('데이터를 불러오는 데 실패했습니다 (비어있음).', true);
+            }
         } catch (error) {
             console.error(error);
             showToast('데이터 로드 실패: ' + error.message, true);
