@@ -335,8 +335,9 @@ document.addEventListener('DOMContentLoaded', () => {
         let trHead1 = '<tr><th rowspan="2">기업명</th>';
         let trHead2 = '<tr>';
         years.forEach(y => {
-            trHead1 += `<th colspan="2" style="text-align: center; border-bottom: 1px solid var(--glass-border);">${y}년</th>`;
-            trHead2 += `<th>매출</th><th>영업이익</th>`;
+            const hClass = y === '2025' ? ' class="col-highlight"' : '';
+            trHead1 += `<th colspan="2" style="text-align: center; border-bottom: 1px solid var(--glass-border);"${hClass}>${y}년</th>`;
+            trHead2 += `<th${hClass}>매출</th><th${hClass}>영업이익</th>`;
         });
         trHead1 += '</tr>';
         trHead2 += '</tr>';
@@ -349,12 +350,16 @@ document.addEventListener('DOMContentLoaded', () => {
             let rowHtml = `<tr><td>${company}</td>`;
             
             years.forEach(y => {
+                const cellClassBase = y === '2025' ? 'col-highlight' : '';
+                
                 if (rowData[y]) {
                     const profClass = rowData[y].prof < 0 ? 'profit-neg' : '';
-                    rowHtml += `<td>${formatKoreanCurrency(rowData[y].rev)}</td>`;
-                    rowHtml += `<td class="${profClass}">${formatKoreanCurrency(rowData[y].prof)}</td>`;
+                    const class1 = cellClassBase;
+                    const class2 = `${cellClassBase} ${profClass}`.trim();
+                    rowHtml += `<td${class1 ? ` class="${class1}"` : ''}>${formatKoreanCurrency(rowData[y].rev)}</td>`;
+                    rowHtml += `<td${class2 ? ` class="${class2}"` : ''}>${formatKoreanCurrency(rowData[y].prof)}</td>`;
                 } else {
-                    rowHtml += `<td>-</td><td>-</td>`;
+                    rowHtml += `<td${cellClassBase ? ` class="${cellClassBase}"` : ''}>-</td><td${cellClassBase ? ` class="${cellClassBase}"` : ''}>-</td>`;
                 }
             });
             rowHtml += '</tr>';

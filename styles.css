@@ -338,8 +338,23 @@ select:focus {
     cursor: default;
 }
 
+#financial-table tbody tr:hover td.col-highlight {
+    background: var(--accent-color);
+    color: #ffffff;
+}
+
 #financial-table tbody tr:hover td.profit-neg {
     color: #ffcccc !important; /* Lighter red for visibility on solid blue background */
+}
+
+/* Highlight for latest year (2025) */
+#financial-table th.col-highlight {
+    background: rgba(236, 72, 153, 0.15); /* pinkish highlight tying back to chart */
+    color: #fbcfe8; /* light pink text */
+}
+
+#financial-table td.col-highlight {
+    background: rgba(236, 72, 153, 0.08); /* very subtle pink background */
 }
 
 .profit-neg {
