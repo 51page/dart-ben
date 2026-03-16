@@ -56,6 +56,26 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error(error);
             showToast('데이터 로드 실패: ' + error.message, true);
         }
+        updateVisitorCount();
+    }
+
+    function updateVisitorCount() {
+        // Simple mock visitor counter using localStorage
+        let total = parseInt(localStorage.getItem('total_visitors') || '3842');
+        let today = parseInt(localStorage.getItem('today_visitors') || '124');
+        let lastVisit = localStorage.getItem('last_visit_date');
+        const now = new Date().toDateString();
+
+        if (lastVisit !== now) {
+            today = today + 1;
+            localStorage.setItem('today_visitors', today);
+            localStorage.setItem('last_visit_date', now);
+        }
+        total = total + 1;
+        localStorage.setItem('total_visitors', total);
+
+        document.getElementById('visitor-today').textContent = today.toLocaleString();
+        document.getElementById('visitor-total').textContent = total.toLocaleString();
     }
 
     init();
@@ -251,11 +271,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 layout: { padding: { top: 30 } },
                 plugins: {
                     datalabels: {
-                        anchor: 'end',
-                        align: 'end',
-                        color: '#444',
-                        font: { size: 10, weight: 600 },
-                        formatter: (val) => val ? formatKoreanCurrency(val) : ''
+                        color: (context) => {
+                            // Profit (Line) labels in white if they are inside or close to bars, 
+                            // but based on the user request "막대그래프안에 영업이익 숫자는 화이트"
+                            // If it's the line dataset (index 0), make it white with a small background or glow for contrast
+                            return context.datasetIndex === 0 ? '#FFFFFF' : '#444444'; 
+                        },
+                        font: { size: 10, weight: 700 },
+                        align: (context) => context.datasetIndex === 0 ? 'top' : 'end',
+                        anchor: (context) => context.datasetIndex === 0 ? 'start' : 'end',
+                        offset: (context) => context.datasetIndex === 0 ? 4 : 4,
+                        formatter: (val) => val ? formatKoreanCurrency(val) : '',
+                        // Hide labels on small screens if they still overlap, or just adjust position
+                        display: (context) => {
+                            return true;
+                        }
                     },
                     legend: { 
                         position: 'top', 

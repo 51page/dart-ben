@@ -327,5 +327,5 @@ select {
     .ribbon-controls { flex-direction: column; align-items: stretch; gap: 10px; }
     .formula-bar { display: none; }
     .summary-grid { margin: 10px; }
-    .chart-cell-container { margin: 10px; height: 300px; }
+    .chart-cell-container { margin: 10px; height: 350px; padding: 10px; }
 }
