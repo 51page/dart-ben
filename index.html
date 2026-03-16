@@ -149,9 +149,9 @@
                     todayData = await callApi(TODAY_URL);
                 }
 
-                // Update UI (Base 15,420 and 425 for visual density)
-                document.getElementById('visitor-today').textContent = (Number(todayData.value) + 425).toLocaleString();
-                document.getElementById('visitor-total').textContent = (Number(totalData.value) + 15420).toLocaleString();
+                // Update UI (Show actual values from API)
+                document.getElementById('visitor-today').textContent = Number(todayData.value).toLocaleString();
+                document.getElementById('visitor-total').textContent = Number(totalData.value).toLocaleString();
 
             } catch (e) {
                 console.warn('CounterAPI Error:', e);
