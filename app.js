@@ -220,10 +220,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (chartInstance) chartInstance.destroy();
         Chart.defaults.color = '#666666';
         Chart.defaults.font.family = "'Segoe UI', Tahoma, sans-serif";
-        if (typeof ChartDataLabels !== 'undefined') Chart.register(ChartDataLabels);
+        if (typeof ChartDataLabels !== 'undefined') {
+            Chart.register(ChartDataLabels);
+        }
         
         chartInstance = new Chart(ctx, {
             type: 'bar',
+            plugins: [ChartDataLabels], // Explicitly include the plugin
             data: {
                 labels: labels,
                 datasets: [
@@ -238,8 +241,20 @@ document.addEventListener('DOMContentLoaded', () => {
                         pointBorderColor: profColor,
                         pointBorderWidth: 2,
                         pointRadius: 4,
-                        tension: 0, // Straight lines for professional look
-                        yAxisID: 'y'
+                        tension: 0, 
+                        yAxisID: 'y',
+                        datalabels: {
+                            display: true,
+                            align: 'bottom',
+                            anchor: 'end',
+                            offset: 10,
+                            color: '#FFFFFF',
+                            backgroundColor: 'rgba(50, 50, 50, 0.8)',
+                            borderRadius: 3,
+                            padding: 4,
+                            font: { size: window.innerWidth < 768 ? 9 : 10, weight: 'bold' },
+                            formatter: (val) => formatKoreanCurrency(val, window.innerWidth < 768)
+                        }
                     },
                     {
                         type: 'bar',
@@ -247,9 +262,21 @@ document.addEventListener('DOMContentLoaded', () => {
                         data: revenues,
                         backgroundColor: revColor,
                         borderColor: 'transparent',
-                        borderRadius: 0, // Square bars for Excel look
+                        borderRadius: 0, 
                         barPercentage: 0.6,
-                        yAxisID: 'y'
+                        yAxisID: 'y',
+                        datalabels: {
+                            display: true,
+                            align: 'top',
+                            anchor: 'end',
+                            offset: 5,
+                            color: '#333333',
+                            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                            borderRadius: 3,
+                            padding: 4,
+                            font: { size: window.innerWidth < 768 ? 9 : 10, weight: 'bold' },
+                            formatter: (val) => formatKoreanCurrency(val, window.innerWidth < 768)
+                        }
                     }
                 ]
             },
@@ -260,19 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 layout: { padding: { top: 60, bottom: 20, left: 10, right: 10 } },
                 plugins: {
                     datalabels: {
-                        display: true,
-                        color: (context) => context.datasetIndex === 0 ? '#FFFFFF' : '#333333',
-                        backgroundColor: (context) => context.datasetIndex === 0 ? 'rgba(50, 50, 50, 0.8)' : 'rgba(255, 255, 255, 0.9)',
-                        borderRadius: 3,
-                        padding: 4,
-                        font: { size: (context) => window.innerWidth < 768 ? 9 : 10, weight: 'bold' },
-                        align: (context) => context.datasetIndex === 0 ? 'bottom' : 'top',
-                        anchor: 'end',
-                        offset: 8,
-                        formatter: (val) => {
-                            if (!val && val !== 0) return '';
-                            return formatKoreanCurrency(val, window.innerWidth < 768);
-                        }
+                        display: false // We are defining it per dataset for better control
                     },
                     legend: { 
                         position: 'top', 
