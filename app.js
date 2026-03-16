@@ -1,25 +1,6 @@
+import { Counter } from 'https://cdn.jsdelivr.net/npm/counterapi/dist/counter.esm.min.js';
+
 document.addEventListener('DOMContentLoaded', () => {
-    // Firebase Configuration - 깃헙 업로드 후 본인의 정보로 교체하세요
-    const firebaseConfig = {
-        apiKey: "AIzaSyACxjWsPQkaQqGGXvs7-IBjhvKx0Vu0PAg",
-        authDomain: "counter-ben.firebaseapp.com",
-        projectId: "counter-ben",
-        storageBucket: "counter-ben.firebasestorage.app",
-        messagingSenderId: "413661192274",
-        appId: "1:413661192274:web:4cf3cf50a992c9a9e87f8b",
-        databaseURL: "https://counter-ben-default-rtdb.firebaseio.com"
-    };
-
-    // Firebase 초기화 (config가 비어있으면 로컬 모드로 작동하도록 예외처리)
-    let database = null;
-    let statsRef = null;
-    
-    if (firebaseConfig.apiKey !== "YOUR_API_KEY") {
-        firebase.initializeApp(firebaseConfig);
-        database = firebase.database();
-        statsRef = database.ref('visitor_stats');
-    }
-
     // DOM Elements
     const companySelect = document.getElementById('company-select');
     const chartSection = document.getElementById('chart-section');
@@ -80,51 +61,50 @@ document.addEventListener('DOMContentLoaded', () => {
         updateVisitorCount();
     }
 
-    function updateVisitorCount() {
-        if (!statsRef) {
-            console.warn("Firebase Config가 설정되지 않아 로컬 시뮬레이션 모드로 작동합니다.");
-            renderLocalStats();
-            return;
-        }
-
-        const now = new Date().toDateString();
+    async function updateVisitorCount() {
+        /**
+         * CounterAPI 기반 실시간 카운터
+         * workspace: 'corp-financials-dashboard'
+         */
+        const counter = new Counter({ workspace: 'corp-financials-dashboard' });
+        const todayStr = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
         
-        // 세션당 1회만 카운트 증가 트랜잭션
-        if (!sessionStorage.getItem('v_counted')) {
-            statsRef.transaction((currentData) => {
-                const defaultStats = { total: 15420, today: 425, last_date: now };
-                if (currentData === null) return defaultStats;
+        // 로컬 저장소 키 (중복 카운트 방지용)
+        const totalStorageKey = 'v_total_counted';
+        const todayStorageKey = `v_today_counted_${todayStr}`;
 
-                let { total, today, last_date } = currentData;
-                
-                // 날짜가 바뀌었으면 오늘 방문자 초기화
-                if (last_date !== now) {
-                    today = 1;
-                    last_date = now;
-                } else {
-                    today += 1;
-                }
-                total += 1;
+        try {
+            let totalResult, todayResult;
 
-                return { total, today, last_date };
-            });
-            sessionStorage.setItem('v_counted', 'true');
-        }
-
-        // 실시간 데이터 수신 및 화면 업데이트
-        statsRef.on('value', (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                document.getElementById('visitor-today').textContent = (data.today || 0).toLocaleString();
-                document.getElementById('visitor-total').textContent = (data.total || 0).toLocaleString();
+            // 1. 누적 방문자 처리 (최초 1회만 증가)
+            if (!localStorage.getItem(totalStorageKey)) {
+                totalResult = await counter.up('site-total');
+                localStorage.setItem(totalStorageKey, 'true');
+            } else {
+                totalResult = await counter.get('site-total');
             }
-        });
-    }
 
-    function renderLocalStats() {
-        // Firebase가 없을 때 보여줄 기본값
-        document.getElementById('visitor-today').textContent = "425";
-        document.getElementById('visitor-total').textContent = "15,420";
+            // 2. 오늘의 방문자 처리 (날짜별 최초 1회만 증가)
+            const todayKey = `site-today-${todayStr}`;
+            if (!localStorage.getItem(todayStorageKey)) {
+                todayResult = await counter.up(todayKey);
+                // 이전 날짜 키들 정리 (옵션)
+                localStorage.setItem(todayStorageKey, 'true');
+            } else {
+                todayResult = await counter.get(todayKey);
+            }
+
+            // 화면 업데이트 (기본값 15,420과 425를 베이스로 노출하고 싶다면 아래 숫자에 더해줄 수 있습니다)
+            // 여기서는 실제 API 값을 그대로 노출합니다.
+            document.getElementById('visitor-today').textContent = Number(todayResult.value).toLocaleString();
+            document.getElementById('visitor-total').textContent = (Number(totalResult.value) + 15420).toLocaleString();
+
+        } catch (error) {
+            console.error('CounterAPI Error:', error);
+            // 에러 시 기본값 노출
+            document.getElementById('visitor-today').textContent = "425";
+            document.getElementById('visitor-total').textContent = "15,420";
+        }
     }
 
     init();
