@@ -325,30 +325,40 @@ document.addEventListener('DOMContentLoaded', () => {
         const tableObj = document.getElementById('financial-table');
         const thead = tableObj.querySelector('thead');
         const tbody = tableObj.querySelector('tbody');
-        const companies = companyDisplayOrder; // Use the preserved order
+        const companies = companyDisplayOrder;
         const allYearsSet = new Set();
         companies.forEach(c => Object.keys(financialData[c]).forEach(y => allYearsSet.add(y)));
         let years = Array.from(allYearsSet).sort().reverse();
         
-        let trHead1 = '<tr><th rowspan="2" class="sticky-col">기업명</th>';
-        let trHead2 = '<tr>';
+        // Excel column headers (A, B, C...)
+        let trExcelCols = '<tr><th class="excel-col-label"></th><th class="excel-col-label">A</th>';
+        years.forEach((y, i) => {
+            const colIdx1 = String.fromCharCode(66 + (i * 2)); // B, D, F...
+            const colIdx2 = String.fromCharCode(67 + (i * 2)); // C, E, G...
+            trExcelCols += `<th colspan="2" class="excel-col-label">${colIdx1}:${colIdx2}</th>`;
+        });
+        trExcelCols += '</tr>';
+
+        let trHead1 = trExcelCols + '<tr><th class="excel-col-label">1</th><th rowspan="2" class="sticky-col">기업명</th>';
+        let trHead2 = '<tr><th class="excel-col-label">2</th>';
         years.forEach(y => {
             const hClass = y === '2025' ? ' class="col-highlight"' : '';
-            trHead1 += `<th colspan="2" style="text-align: center; border-bottom: 1px solid var(--glass-border);"${hClass}>${y}년</th>`;
+            trHead1 += `<th colspan="2" style="text-align: center; border-bottom: 1px solid var(--grid-border);"${hClass}>${y}년</th>`;
             trHead2 += `<th${hClass}>매출</th><th${hClass}>영업이익</th>`;
         });
         thead.innerHTML = trHead1 + '</tr>' + trHead2 + '</tr>';
         
         let trsBody = '';
-        companies.forEach(company => {
+        companies.forEach((company, idx) => {
             const rowData = financialData[company];
-            let rowHtml = `<tr><td class="sticky-col">${company}</td>`;
+            const excelRowIdx = idx + 3;
+            let rowHtml = `<tr><td class="excel-col-label">${excelRowIdx}</td><td class="sticky-col">${company}</td>`;
             years.forEach(y => {
                 const hClass = y === '2025' ? 'col-highlight' : '';
                 if (rowData[y]) {
                     const pClass = rowData[y].prof < 0 ? 'profit-neg' : '';
                     rowHtml += `<td class="${hClass}">${formatKoreanCurrency(rowData[y].rev)}</td>`;
-                    rowHtml += `<td class="${hClass} ${pClass}">${formatKoreanCurrency(rowData[y].prof)}</td>`;
+                    rowHtml += `<td class="${hClass} ${pClass}">${formatKoreanCurrency(rowData[y].prof) || '-'}</td>`;
                 } else {
                     rowHtml += `<td class="${hClass}">-</td><td class="${hClass}">-</td>`;
                 }
