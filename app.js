@@ -12,21 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let financialData = {}; 
     let companyDisplayOrder = [];
     let chartInstance = null;
-
-    // Industry Mapping
-    const industryMap = {
-        '대한항공': '항공',
-        '삼성전자': '전자기기',
-        '네이버': 'IT',
-        '카카오': 'IT',
-        '현대자동차': '자동차',
-        '패션사': '패션',
-        '언론사': '언론'
-    };
-    
-    function getIndustry(company) {
-        return industryMap[company] || '기타';
-    }
     
     // Initialization
     async function init() {
@@ -342,21 +327,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const tbody = tableObj.querySelector('tbody');
         const companies = companyDisplayOrder;
         
-        // Excel column headers (Industry, A, B, C, D)
+        // Excel column headers (A, B, C, D)
         let headerHtml = `
             <tr>
-                <th class="excel-col-label">구분</th>
                 <th class="excel-col-label">A</th>
                 <th class="excel-col-label">B</th>
                 <th class="excel-col-label">C</th>
                 <th class="excel-col-label">D</th>
             </tr>
             <tr>
-                <th class="excel-col-label">산업군</th>
-                <th class="sticky-col" style="width: 120px;">기업명</th>
-                <th style="width: 70px; text-align: center;">연도</th>
-                <th style="text-align: right; width: 130px;">매출액</th>
-                <th style="text-align: right; width: 130px;">영업이익</th>
+                <th class="sticky-col" style="width: 140px; text-align: left;">기업명</th>
+                <th style="width: 80px; text-align: left;">연도</th>
+                <th style="text-align: left; width: 140px;">매출액</th>
+                <th style="text-align: left; width: 140px;">영업이익</th>
             </tr>
         `;
         thead.innerHTML = headerHtml;
@@ -366,7 +349,6 @@ document.addEventListener('DOMContentLoaded', () => {
         companies.forEach((company) => {
             const rowData = financialData[company];
             const years = Object.keys(rowData).filter(y => y >= '2021' && y <= '2025').sort().reverse();
-            const industry = getIndustry(company);
             const rowCount = years.length || 1;
             
             years.forEach((year, yIdx) => {
@@ -376,17 +358,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 let cells = '';
                 if (isFirstYear) {
-                    // Span industry and company cells for the entire group
-                    cells += `<td class="excel-col-label industry-label" rowspan="${rowCount}">${industry}</td>`;
-                    cells += `<td class="sticky-col company-name-cell" rowspan="${rowCount}"><strong>${company}</strong></td>`;
+                    // Span company cell for the entire group
+                    cells += `<td class="sticky-col company-name-cell" rowspan="${rowCount}" style="text-align: left;"><strong>${company}</strong></td>`;
                 }
                 
                 trsBody += `
                     <tr class="${rowClass}">
                         ${cells}
-                        <td style="text-align: center; color: #666; font-size: 12px;">${year}년</td>
-                        <td style="text-align: right; font-variant-numeric: tabular-nums;">${formatKoreanCurrency(rowData[year].rev)}</td>
-                        <td style="text-align: right; font-variant-numeric: tabular-nums;" class="${pClass}">${formatKoreanCurrency(rowData[year].prof)}</td>
+                        <td style="text-align: left; color: #666; font-size: 12px;">${year}년</td>
+                        <td style="text-align: left; font-variant-numeric: tabular-nums;">${formatKoreanCurrency(rowData[year].rev)}</td>
+                        <td style="text-align: left; font-variant-numeric: tabular-nums;" class="${pClass}">${formatKoreanCurrency(rowData[year].prof)}</td>
                     </tr>
                 `;
             });

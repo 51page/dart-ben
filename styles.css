@@ -256,26 +256,21 @@ body {
 
 #financial-table td[rowspan] {
     vertical-align: middle;
-    text-align: center;
+    text-align: left;
     background-color: #f9f9f9;
 }
 
 .company-name-cell {
     font-size: 13px;
     padding: 10px !important;
-    white-space: normal !important; /* Allow wrapping if needed */
-    max-width: 120px;
-}
-
-.industry-label {
-    font-weight: 600;
-    color: var(--excel-green);
-    min-width: 60px;
+    white-space: normal !important;
+    max-width: 140px;
 }
 
 /* Compact Table Adjustments */
 #financial-table td {
-    padding: 4px 8px;
+    padding: 6px 12px;
+    text-align: left;
 }
 
 /* Control Elements */
