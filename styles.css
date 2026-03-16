@@ -251,6 +251,31 @@ body {
 
 .company-start-row .sticky-col {
     color: var(--excel-green);
+    background-color: #f9f9f9;
+}
+
+#financial-table td[rowspan] {
+    vertical-align: middle;
+    text-align: center;
+    background-color: #f9f9f9;
+}
+
+.company-name-cell {
+    font-size: 13px;
+    padding: 10px !important;
+    white-space: normal !important; /* Allow wrapping if needed */
+    max-width: 120px;
+}
+
+.industry-label {
+    font-weight: 600;
+    color: var(--excel-green);
+    min-width: 60px;
+}
+
+/* Compact Table Adjustments */
+#financial-table td {
+    padding: 4px 8px;
 }
 
 /* Control Elements */
