@@ -260,14 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     },
                     legend: { position: 'top', labels: { usePointStyle: true, padding: 20, font: { size: 14, weight: 600 } } },
                     tooltip: {
-                        backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                        titleColor: '#fff',
-                        bodyColor: '#cbd5e1',
-                        padding: 12,
-                        cornerRadius: 8,
-                        callbacks: {
-                            label: (ctx) => (ctx.dataset.label || '') + ': ' + formatKoreanCurrency(ctx.parsed.y)
-                        }
+                        enabled: false
                     }
                 },
                 scales: {

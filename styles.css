@@ -233,12 +233,34 @@ select:focus {
 
 /* Responsive */
 @media (max-width: 768px) {
-    body { padding: 1.25rem; }
-    .controls-section { flex-direction: column; align-items: stretch; }
-    .control-group { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
-    select { max-width: 100%; }
-    .chart-container { height: 350px; padding: 1rem; }
-    .dashboard-header h1 { font-size: 2rem; }
+    body { padding: 1rem 0.5rem; }
+    .dashboard-container { gap: 1rem; }
+    .dashboard-header h1 { font-size: 1.75rem; margin-top: 1rem; }
+    .dashboard-header p { font-size: 0.9rem; }
+    
+    .glass-panel { padding: 1rem; border-radius: 1rem; }
+    
+    .controls-section { flex-direction: column; align-items: stretch; gap: 1rem; }
+    .control-group { flex-direction: column; align-items: stretch; gap: 0.5rem; }
+    .control-group label { font-size: 0.85rem; }
+    select { max-width: 100%; padding: 0.6rem; font-size: 0.9rem; }
+    
+    .view-toggle { justify-content: center; }
+    .view-btn { flex: 1; padding: 0.5rem; font-size: 0.85rem; }
+    
+    .summary-cards { grid-template-columns: 1fr; gap: 0.75rem; }
+    .summary-amount { font-size: 1.5rem; }
+    
+    .chart-container { height: 300px; padding: 0.5rem; }
+    
+    #financial-table { min-width: 700px; } /* Reduce min-width for mobile table scroll */
+    #financial-table th, #financial-table td { padding: 0.75rem 0.5rem; font-size: 0.8rem; }
+}
+
+/* Extra small devices */
+@media (max-width: 480px) {
+    .dashboard-header h1 { font-size: 1.5rem; }
+    .summary-amount { font-size: 1.3rem; }
 }
 
 /* View Toggle Buttons */
@@ -295,7 +317,7 @@ select:focus {
 #financial-table {
     width: 100%;
     border-collapse: collapse;
-    text-align: right;
+    text-align: center; /* Changed from right to center */
     min-width: 1000px;
 }
 
@@ -316,14 +338,15 @@ select:focus {
     text-align: left;
     position: sticky;
     left: 0;
-    background: #111a2f; /* Dark opaque background so scrolling text doesn't show behind */
-    z-index: 2;
+    background: #111a2f; /* Solid background */
+    z-index: 10; /* Increased z-index */
     font-weight: 600;
     color: var(--text-color);
+    box-shadow: 4px 0 8px rgba(0, 0, 0, 0.3); /* Add shadow to show it's sticky */
 }
 
 #financial-table th:first-child {
-    z-index: 3;
+    z-index: 11;
 }
 
 #financial-table tbody tr {
