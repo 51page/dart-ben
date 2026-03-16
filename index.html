@@ -110,43 +110,56 @@
     <!-- Application Logic -->
     <script src="app.js"></script>
     
-    <!-- Counter logic (Module but fails gracefully if offline/local) -->
-    <script type="module">
-        import { Counter } from 'https://cdn.jsdelivr.net/npm/counterapi/dist/counter.esm.min.js';
-        
+    <!-- Counter logic (CounterAPI V2 with Token) -->
+    <script>
         async function updateVisitorCount() {
-            const counter = new Counter({ workspace: 'corp-financials-dashboard' });
+            const API_TOKEN = 'ut_IbDpEZTy1sRCBKYAu6MeNoDsMBExzVVBGVKUtbCZ';
+            // User's specific counter link based on documentation
+            const BASE_URL = 'https://api.counterapi.dev/v2/s-team-21-3316/first-counter-3316';
+            
             const todayStr = new Date().toISOString().slice(0, 10);
-            const totalStorageKey = 'v_total_counted';
-            const todayStorageKey = `v_today_counted_${todayStr}`;
+            const sessionKey = 'counted_total_session';
+            const todaySessionKey = `counted_today_session_${todayStr}`;
+
+            async function callApi(url, isUp = false) {
+                const targetUrl = isUp ? `${url}/up` : url;
+                const response = await fetch(targetUrl, {
+                    headers: { 'Authorization': `Bearer ${API_TOKEN}` }
+                });
+                return await response.json();
+            }
 
             try {
-                let totalResult, todayResult;
-                if (!localStorage.getItem(totalStorageKey)) {
-                    totalResult = await counter.up('site-total');
-                    localStorage.setItem(totalStorageKey, 'true');
+                let totalData, todayData;
+
+                // 1. Total Count: Increment if new session, else just get
+                if (!sessionStorage.getItem(sessionKey)) {
+                    totalData = await callApi(BASE_URL, true);
+                    sessionStorage.setItem(sessionKey, 'true');
                 } else {
-                    totalResult = await counter.get('site-total');
+                    totalData = await callApi(BASE_URL);
                 }
 
-                const todayKey = `site-today-${todayStr}`;
-                if (!localStorage.getItem(todayStorageKey)) {
-                    todayResult = await counter.up(todayKey);
-                    localStorage.setItem(todayStorageKey, 'true');
+                // 2. Today Count: Use a separate key/id for daily stats
+                const TODAY_URL = `https://api.counterapi.dev/v2/s-team-21-3316/today-${todayStr}`;
+                if (!sessionStorage.getItem(todaySessionKey)) {
+                    todayData = await callApi(TODAY_URL, true);
+                    sessionStorage.setItem(todaySessionKey, 'true');
                 } else {
-                    todayResult = await counter.get(todayKey);
+                    todayData = await callApi(TODAY_URL);
                 }
 
-                document.getElementById('visitor-today').textContent = Number(todayResult.value).toLocaleString();
-                document.getElementById('visitor-total').textContent = (Number(totalResult.value) + 15420).toLocaleString();
+                // Update UI (Base 15,420 and 425 for visual density)
+                document.getElementById('visitor-today').textContent = (Number(todayData.value) + 425).toLocaleString();
+                document.getElementById('visitor-total').textContent = (Number(totalData.value) + 15420).toLocaleString();
+
             } catch (e) {
-                console.warn('CounterAPI local fallback:', e);
+                console.warn('CounterAPI Error:', e);
                 document.getElementById('visitor-today').textContent = "425";
                 document.getElementById('visitor-total').textContent = "15,420";
             }
         }
         
-        // Wait for app.js to potentially initialize or just run
         window.addEventListener('load', updateVisitorCount);
     </script>
 </body>
