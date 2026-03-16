@@ -60,19 +60,31 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateVisitorCount() {
-        // Simple mock visitor counter using localStorage
-        let total = parseInt(localStorage.getItem('total_visitors') || '3842');
-        let today = parseInt(localStorage.getItem('today_visitors') || '124');
-        let lastVisit = localStorage.getItem('last_visit_date');
+        /**
+         * Real-world web counter simulation. 
+         * To get a truly global counter for different users, a backend service is normally needed.
+         * For this project, we'll use a session-aware persistent count to reflect "visits".
+         */
         const now = new Date().toDateString();
-
-        if (lastVisit !== now) {
-            today = today + 1;
-            localStorage.setItem('today_visitors', today);
-            localStorage.setItem('last_visit_date', now);
+        const lastDate = localStorage.getItem('v_last_date');
+        
+        let total = parseInt(localStorage.getItem('v_total') || '15420');
+        let today = parseInt(localStorage.getItem('v_today') || '425');
+        
+        // Only increment once per browser session to simulate 'new visits'
+        if (!sessionStorage.getItem('session_counted')) {
+            total += 1;
+            if (lastDate !== now) {
+                today = 1; // Reset today if date changed
+                localStorage.setItem('v_last_date', now);
+            } else {
+                today += 1;
+            }
+            
+            localStorage.setItem('v_total', total);
+            localStorage.setItem('v_today', today);
+            sessionStorage.setItem('session_counted', 'true');
         }
-        total = total + 1;
-        localStorage.setItem('total_visitors', total);
 
         document.getElementById('visitor-today').textContent = today.toLocaleString();
         document.getElementById('visitor-total').textContent = total.toLocaleString();
@@ -174,7 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return val;
     }
 
-    function formatKoreanCurrency(amount) {
+    function formatKoreanCurrency(amount, isMobile = false) {
         if (amount === 0) return '0원';
         const isNegative = amount < 0;
         let absVal = Math.abs(amount);
@@ -183,6 +195,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const uk = Math.floor((absVal % 1000000000000) / 100000000);
         const man = Math.floor((absVal % 100000000) / 10000);
         
+        if (isMobile) {
+            // Shorter format for mobile: e.g., 15.2조 or 8200억
+            if (jo > 0) return (isNegative ? '-' : '') + (absVal / 1000000000000).toFixed(1) + '조';
+            if (uk > 0) return (isNegative ? '-' : '') + (absVal / 100000000).toFixed(0) + '억';
+            return (isNegative ? '-' : '') + (absVal / 10000).toFixed(0) + '만';
+        }
+
         let result = '';
         if (jo > 0) result += jo + '조 ';
         if (uk > 0) result += uk + '억 ';
@@ -272,19 +291,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 plugins: {
                     datalabels: {
                         color: (context) => {
-                            // Profit (Line) labels in white if they are inside or close to bars, 
-                            // but based on the user request "막대그래프안에 영업이익 숫자는 화이트"
-                            // If it's the line dataset (index 0), make it white with a small background or glow for contrast
-                            return context.datasetIndex === 0 ? '#FFFFFF' : '#444444'; 
+                            // Line labels (Profit) in White
+                            return context.datasetIndex === 0 ? '#FFFFFF' : '#444444';
                         },
-                        font: { size: 10, weight: 700 },
-                        align: (context) => context.datasetIndex === 0 ? 'top' : 'end',
-                        anchor: (context) => context.datasetIndex === 0 ? 'start' : 'end',
-                        offset: (context) => context.datasetIndex === 0 ? 4 : 4,
-                        formatter: (val) => val ? formatKoreanCurrency(val) : '',
-                        // Hide labels on small screens if they still overlap, or just adjust position
+                        backgroundColor: (context) => {
+                            // Add a subtle background to profit labels for better readability
+                            return context.datasetIndex === 0 ? 'rgba(68, 68, 68, 0.8)' : null;
+                        },
+                        borderRadius: 3,
+                        padding: { left: 4, right: 4, top: 2, bottom: 2 },
+                        font: { 
+                            size: (context) => window.innerWidth < 768 ? 9 : 10, 
+                            weight: 700 
+                        },
+                        // Position: Profit (Line) labels at the bottom of points, Revenue (Bar) labels at the top
+                        align: (context) => context.datasetIndex === 0 ? 'bottom' : 'top',
+                        anchor: (context) => 'end',
+                        offset: (context) => context.datasetIndex === 0 ? 8 : 4,
+                        formatter: (val) => {
+                            if (!val) return '';
+                            const isMobile = window.innerWidth < 768;
+                            return formatKoreanCurrency(val, isMobile);
+                        },
                         display: (context) => {
-                            return true;
+                            // Avoid showing 0 values
+                            return context.dataset.data[context.dataIndex] !== 0;
                         }
                     },
                     legend: { 
