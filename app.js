@@ -336,10 +336,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 <th class="excel-col-label">D</th>
             </tr>
             <tr>
-                <th class="sticky-col" style="width: 140px; text-align: left;">기업명</th>
-                <th style="width: 80px; text-align: left;">연도</th>
-                <th style="text-align: left; width: 140px;">매출액</th>
-                <th style="text-align: left; width: 140px;">영업이익</th>
+                <th class="sticky-col" style="width: 140px; text-align: center;">기업명</th>
+                <th style="width: 80px; text-align: center;">연도</th>
+                <th style="text-align: center; width: 140px;">매출액</th>
+                <th style="text-align: center; width: 140px;">영업이익</th>
             </tr>
         `;
         thead.innerHTML = headerHtml;
@@ -359,15 +359,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 let cells = '';
                 if (isFirstYear) {
                     // Span company cell for the entire group
-                    cells += `<td class="sticky-col company-name-cell" rowspan="${rowCount}" style="text-align: left;"><strong>${company}</strong></td>`;
+                    cells += `<td class="sticky-col company-name-cell" rowspan="${rowCount}" style="text-align: center;"><strong>${company}</strong></td>`;
                 }
+                
+                const is2025 = year === '2025';
+                const boldStyle = is2025 ? ' font-weight: 700; color: #000;' : '';
                 
                 trsBody += `
                     <tr class="${rowClass}">
                         ${cells}
-                        <td style="text-align: left; color: #666; font-size: 12px;">${year}년</td>
-                        <td style="text-align: left; font-variant-numeric: tabular-nums;">${formatKoreanCurrency(rowData[year].rev)}</td>
-                        <td style="text-align: left; font-variant-numeric: tabular-nums;" class="${pClass}">${formatKoreanCurrency(rowData[year].prof)}</td>
+                        <td style="text-align: center; color: #666; font-size: 12px;${boldStyle}">${year}년</td>
+                        <td style="text-align: center; font-variant-numeric: tabular-nums;${boldStyle}">${formatKoreanCurrency(rowData[year].rev)}</td>
+                        <td style="text-align: center; font-variant-numeric: tabular-nums;${boldStyle}" class="${pClass}">${formatKoreanCurrency(rowData[year].prof)}</td>
                     </tr>
                 `;
             });
