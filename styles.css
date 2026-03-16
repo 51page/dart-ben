@@ -334,18 +334,18 @@ select:focus {
     font-weight: 600;
 }
 
-#financial-table th:first-child, #financial-table td:first-child {
+#financial-table .sticky-col {
     text-align: left;
     position: sticky;
     left: 0;
     background: #111a2f; /* Solid background */
-    z-index: 10; /* Increased z-index */
+    z-index: 10;
     font-weight: 600;
     color: var(--text-color);
-    box-shadow: 4px 0 8px rgba(0, 0, 0, 0.3); /* Add shadow to show it's sticky */
+    box-shadow: 4px 0 8px rgba(0, 0, 0, 0.3);
 }
 
-#financial-table th:first-child {
+#financial-table th.sticky-col {
     z-index: 11;
 }
 
@@ -354,7 +354,7 @@ select:focus {
 }
 
 #financial-table tbody tr:hover td,
-#financial-table tbody tr:hover td:first-child {
+#financial-table tbody tr:hover td.sticky-col {
     background: var(--accent-color);
     color: #ffffff;
     font-weight: 600;

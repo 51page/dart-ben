@@ -320,7 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
         companies.forEach(c => Object.keys(financialData[c]).forEach(y => allYearsSet.add(y)));
         let years = Array.from(allYearsSet).sort().reverse();
         
-        let trHead1 = '<tr><th rowspan="2">기업명</th>';
+        let trHead1 = '<tr><th rowspan="2" class="sticky-col">기업명</th>';
         let trHead2 = '<tr>';
         years.forEach(y => {
             const hClass = y === '2025' ? ' class="col-highlight"' : '';
@@ -332,7 +332,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let trsBody = '';
         companies.forEach(company => {
             const rowData = financialData[company];
-            let rowHtml = `<tr><td>${company}</td>`;
+            let rowHtml = `<tr><td class="sticky-col">${company}</td>`;
             years.forEach(y => {
                 const hClass = y === '2025' ? 'col-highlight' : '';
                 if (rowData[y]) {
