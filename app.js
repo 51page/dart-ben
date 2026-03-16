@@ -455,7 +455,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 trsBody += `
                     <tr class="${rowClass}">
                         ${cells}
-                        <td style="text-align: center; color: #666; font-size: 12px;${boldStyle}">${year}년</td>
+                        <td style="text-align: center; color: #666; font-size: 12px;${boldStyle}">${year}</td>
                         <td style="text-align: center; font-variant-numeric: tabular-nums;${boldStyle}">${formatKoreanCurrency(rowData[year].rev)}</td>
                         <td style="text-align: center; font-variant-numeric: tabular-nums;${boldStyle}" class="${pClass}">${formatKoreanCurrency(rowData[year].prof)}</td>
                     </tr>
