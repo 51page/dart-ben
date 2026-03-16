@@ -1,5 +1,3 @@
-import { Counter } from 'https://cdn.jsdelivr.net/npm/counterapi/dist/counter.esm.min.js';
-
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
     const companySelect = document.getElementById('company-select');
@@ -58,54 +56,9 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error(error);
             showToast('데이터 로드 실패: ' + error.message, true);
         }
-        updateVisitorCount();
     }
 
-    async function updateVisitorCount() {
-        /**
-         * CounterAPI 기반 실시간 카운터
-         * workspace: 'corp-financials-dashboard'
-         */
-        const counter = new Counter({ workspace: 'corp-financials-dashboard' });
-        const todayStr = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-        
-        // 로컬 저장소 키 (중복 카운트 방지용)
-        const totalStorageKey = 'v_total_counted';
-        const todayStorageKey = `v_today_counted_${todayStr}`;
-
-        try {
-            let totalResult, todayResult;
-
-            // 1. 누적 방문자 처리 (최초 1회만 증가)
-            if (!localStorage.getItem(totalStorageKey)) {
-                totalResult = await counter.up('site-total');
-                localStorage.setItem(totalStorageKey, 'true');
-            } else {
-                totalResult = await counter.get('site-total');
-            }
-
-            // 2. 오늘의 방문자 처리 (날짜별 최초 1회만 증가)
-            const todayKey = `site-today-${todayStr}`;
-            if (!localStorage.getItem(todayStorageKey)) {
-                todayResult = await counter.up(todayKey);
-                // 이전 날짜 키들 정리 (옵션)
-                localStorage.setItem(todayStorageKey, 'true');
-            } else {
-                todayResult = await counter.get(todayKey);
-            }
-
-            // 화면 업데이트 (기본값 15,420과 425를 베이스로 노출하고 싶다면 아래 숫자에 더해줄 수 있습니다)
-            // 여기서는 실제 API 값을 그대로 노출합니다.
-            document.getElementById('visitor-today').textContent = Number(todayResult.value).toLocaleString();
-            document.getElementById('visitor-total').textContent = (Number(totalResult.value) + 15420).toLocaleString();
-
-        } catch (error) {
-            console.error('CounterAPI Error:', error);
-            // 에러 시 기본값 노출
-            document.getElementById('visitor-today').textContent = "425";
-            document.getElementById('visitor-total').textContent = "15,420";
-        }
-    }
+    // Visitor count is now handled via inline module in index.html for better local file support
 
     init();
 
@@ -324,7 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     legend: { 
                         position: 'top', 
                         align: 'start',
-                        labels: { boxWidth: 12, padding: 25, font: { size: 12, weight: 600 } } 
+                        labels: { boxWidth: 12, padding: 30, font: { size: 12, weight: 'bold' } } 
                     },
                     tooltip: {
                         enabled: false
