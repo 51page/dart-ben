@@ -304,25 +304,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 responsive: true,
                 maintainAspectRatio: false,
                 interaction: { mode: 'index', intersect: false },
-                layout: { padding: { top: 40, bottom: 10, left: 10, right: 10 } },
+                layout: { padding: { top: 60, bottom: 20, left: 10, right: 10 } },
                 plugins: {
                     datalabels: {
-                        color: (context) => context.datasetIndex === 0 ? '#FFFFFF' : '#444444',
-                        backgroundColor: (context) => context.datasetIndex === 0 ? 'rgba(0, 0, 0, 0.6)' : 'rgba(255, 255, 255, 0.7)',
+                        display: true,
+                        color: (context) => context.datasetIndex === 0 ? '#FFFFFF' : '#333333',
+                        backgroundColor: (context) => context.datasetIndex === 0 ? 'rgba(50, 50, 50, 0.8)' : 'rgba(255, 255, 255, 0.9)',
                         borderRadius: 3,
+                        padding: 4,
                         font: { size: (context) => window.innerWidth < 768 ? 9 : 10, weight: 'bold' },
                         align: (context) => context.datasetIndex === 0 ? 'bottom' : 'top',
                         anchor: 'end',
-                        offset: 5,
+                        offset: 8,
                         formatter: (val) => {
-                            if (!val) return '';
+                            if (!val && val !== 0) return '';
                             return formatKoreanCurrency(val, window.innerWidth < 768);
                         }
                     },
                     legend: { 
                         position: 'top', 
-                        align: 'start', // 범례 위치를 왼쪽 상단으로 이동
-                        labels: { boxWidth: 12, padding: 10, font: { size: 12 } } 
+                        align: 'start',
+                        labels: { boxWidth: 12, padding: 25, font: { size: 12, weight: 600 } } 
                     },
                     tooltip: {
                         enabled: false
