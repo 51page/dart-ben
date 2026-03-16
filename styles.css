@@ -1,14 +1,15 @@
-/* Base & Variables */
+/* Excel-Style Business Report Theme */
 :root {
-    --bg-color: #0f172a;
-    --text-color: #f8fafc;
-    --text-muted: #94a3b8;
-    --glass-bg: rgba(30, 41, 59, 0.6);
-    --glass-border: rgba(255, 255, 255, 0.08);
-    --accent-color: #3b82f6;
-    --accent-hover: #2563eb;
-    --danger: #ef4444;
-    --success: #10b981;
+    --excel-green: #217346;
+    --excel-green-light: #e9f5ee;
+    --bg-color: #f3f4f6;
+    --text-color: #333333;
+    --text-muted: #666666;
+    --border-color: #d1d5db;
+    --header-bg: #ffffff;
+    --card-bg: #ffffff;
+    --accent-color: #217346;
+    --accent-hover: #1a5c38;
 }
 
 * {
@@ -18,369 +19,217 @@
 }
 
 body {
-    font-family: 'Inter', sans-serif;
-    background: radial-gradient(circle at top, #1e1b4b 0%, #0f172a 100%);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
     color: var(--text-color);
-    min-height: 100vh;
-    padding: 2rem;
-    line-height: 1.5;
+    line-height: 1.6;
+    padding: 1.5rem;
 }
 
 .dashboard-container {
-    max-width: 1100px;
+    max-width: 1300px;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
-    gap: 2rem;
+    gap: 1.5rem;
 }
 
 /* Header */
 .dashboard-header {
-    text-align: center;
-    margin-bottom: 0.5rem;
-    animation: fadeInDown 0.6s ease-out;
+    background: var(--excel-green);
+    color: white;
+    padding: 1.5rem 2rem;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .dashboard-header h1 {
-    font-size: 2.75rem;
-    font-weight: 700;
-    background: linear-gradient(to right, #60a5fa, #c084fc);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: 0.5rem;
-    letter-spacing: -0.02em;
+    font-size: 1.8rem;
+    font-weight: 600;
 }
 
 .dashboard-header p {
-    color: var(--text-muted);
-    font-size: 1.1rem;
+    font-size: 0.95rem;
+    opacity: 0.9;
 }
 
-/* Glassmorphism Classes */
+/* Common Panel Style (Excel-like Sheet) */
 .glass-panel {
-    background: var(--glass-bg);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid var(--glass-border);
-    border-radius: 1.25rem;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
     padding: 1.5rem;
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
-/* Removed Drop Zone */
-
-/* Controls Section */
+/* Controls */
 .controls-section {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 1.5rem;
-    animation: fadeIn 0.5s ease-out;
+    border-left: 4px solid var(--excel-green);
 }
 
 .control-group {
     display: flex;
     align-items: center;
     gap: 1rem;
-    flex: 1;
 }
 
 .control-group label {
-    font-weight: 500;
-    color: var(--text-muted);
-    white-space: nowrap;
+    font-weight: 600;
+    font-size: 0.9rem;
 }
 
 select {
-    width: 100%;
-    max-width: 320px;
-    padding: 0.75rem 1rem;
-    border-radius: 0.75rem;
-    background: rgba(15, 23, 42, 0.8);
-    color: white;
-    border: 1px solid var(--glass-border);
-    font-size: 1rem;
-    outline: none;
-    cursor: pointer;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 1rem center;
-    background-size: 1.2rem;
-}
-
-select:focus {
-    border-color: var(--accent-color);
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
-}
-
-/* Chart and Metrics Area */
-.chart-section {
-    animation: fadeIn 0.8s ease-out;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
-.summary-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
-}
-
-.summary-card {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    text-align: left;
-    transition: transform 0.2s;
-}
-
-.summary-card:hover {
-    transform: translateY(-2px);
-}
-
-.summary-card h4 {
-    color: var(--text-muted);
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-weight: 600;
-}
-
-.summary-body {
-    display: flex;
-    align-items: baseline;
-    gap: 0.75rem;
-}
-
-.summary-amount {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: var(--text-color);
-    letter-spacing: -0.02em;
-}
-
-.summary-yoy {
+    padding: 0.5rem 2rem 0.5rem 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 2px;
     font-size: 0.9rem;
-    font-weight: 600;
-    padding: 0.2rem 0.5rem;
-    border-radius: 4px;
-}
-
-.yoy-pos {
-    background: rgba(16, 185, 129, 0.1);
-    color: var(--success);
-}
-.yoy-neg {
-    background: rgba(239, 68, 68, 0.1);
-    color: var(--danger);
-}
-
-.chart-container {
-    position: relative;
-    height: 480px;
-    width: 100%;
-    padding: 1.5rem;
-}
-
-/* Toast Notification */
-.toast {
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    background: var(--success);
-    color: white;
-    padding: 1rem 1.75rem;
-    border-radius: 0.75rem;
-    font-weight: 500;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
-    transform: translateY(150%);
-    opacity: 0;
-    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    z-index: 50;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.toast.show {
-    transform: translateY(0);
-    opacity: 1;
-}
-
-.toast.error {
-    background: var(--danger);
-}
-
-/* Animations */
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@keyframes fadeInDown {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    body { padding: 1rem 0.5rem; }
-    .dashboard-container { gap: 1rem; }
-    .dashboard-header h1 { font-size: 1.75rem; margin-top: 1rem; }
-    .dashboard-header p { font-size: 0.9rem; }
-    
-    .glass-panel { padding: 1rem; border-radius: 1rem; }
-    
-    .controls-section { flex-direction: column; align-items: stretch; gap: 1rem; }
-    .control-group { flex-direction: column; align-items: stretch; gap: 0.5rem; }
-    .control-group label { font-size: 0.85rem; }
-    select { max-width: 100%; padding: 0.6rem; font-size: 0.9rem; }
-    
-    .view-toggle { justify-content: center; }
-    .view-btn { flex: 1; padding: 0.5rem; font-size: 0.85rem; }
-    
-    .summary-cards { grid-template-columns: 1fr; gap: 0.75rem; }
-    .summary-amount { font-size: 1.5rem; }
-    
-    .chart-container { height: 300px; padding: 0.5rem; }
-    
-    #financial-table { min-width: 700px; } /* Reduce min-width for mobile table scroll */
-    #financial-table th, #financial-table td { padding: 0.75rem 0.5rem; font-size: 0.8rem; }
-}
-
-/* Extra small devices */
-@media (max-width: 480px) {
-    .dashboard-header h1 { font-size: 1.5rem; }
-    .summary-amount { font-size: 1.3rem; }
+    background-color: #fff;
+    cursor: pointer;
 }
 
 /* View Toggle Buttons */
-.view-toggle {
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.5rem;
-}
-
 .view-btn {
-    background: rgba(15, 23, 42, 0.8);
-    color: var(--text-muted);
-    border: 1px solid var(--glass-border);
-    padding: 0.65rem 1.25rem;
-    border-radius: 0.75rem;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
     cursor: pointer;
-    font-size: 0.95rem;
-    font-weight: 500;
     transition: all 0.2s;
-    white-space: nowrap;
 }
 
-.view-btn:hover {
-    color: var(--text-color);
-    border-color: rgba(255, 255, 255, 0.2);
-}
+.view-btn:first-child { border-radius: 2px 0 0 2px; }
+.view-btn:last-child { border-radius: 0 2px 2px 0; border-left: none; }
 
 .view-btn.active {
-    background: var(--accent-color);
+    background: var(--excel-green);
     color: white;
-    border-color: var(--accent-color);
-    box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+    border-color: var(--excel-green);
+}
+
+/* Summary Cards */
+.summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.summary-card {
+    border-top: 3px solid var(--excel-green);
+}
+
+.summary-card h4 {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.summary-amount {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--excel-green);
+}
+
+.summary-yoy {
+    font-size: 0.85rem;
+    padding: 0.1rem 0.4rem;
+    border-radius: 2px;
+    font-weight: 600;
+}
+
+.yoy-pos { color: #d32f2f; } /* Excel style: positive profit change often red in accounting, or stay green */
+.yoy-neg { color: #1976d2; }
+
+/* Chart Area */
+.chart-container {
+    height: 450px;
 }
 
 /* Table Section */
 .table-section {
-    animation: fadeIn 0.8s ease-out;
+    padding: 0;
+    overflow: hidden;
 }
 
 .table-responsive {
     overflow-x: auto;
-    width: 100%;
-}
-
-.table-responsive::-webkit-scrollbar {
-    height: 8px;
-}
-
-.table-responsive::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
 }
 
 #financial-table {
     width: 100%;
     border-collapse: collapse;
-    text-align: center; /* Changed from right to center */
-    min-width: 1000px;
-}
-
-#financial-table th, #financial-table td {
-    padding: 1rem 0.75rem;
-    border-bottom: 1px solid var(--glass-border);
-    font-size: 0.9rem;
-    white-space: nowrap;
+    font-size: 0.85rem;
 }
 
 #financial-table th {
-    background: rgba(15, 23, 42, 0.5);
-    color: var(--text-muted);
+    background-color: #f8f9fa;
+    color: #444;
     font-weight: 600;
+    border: 1px solid #e0e0e0;
+    padding: 8px 12px;
+    text-align: center;
+}
+
+#financial-table td {
+    border: 1px solid #f0f0f0;
+    padding: 8px 12px;
+    text-align: center;
 }
 
 #financial-table .sticky-col {
+    background-color: #ffffff;
+    border-right: 2px solid #ddd;
+    font-weight: 600;
     text-align: left;
     position: sticky;
     left: 0;
-    background: #111a2f; /* Solid background */
-    z-index: 10;
-    font-weight: 600;
-    color: var(--text-color);
-    box-shadow: 4px 0 8px rgba(0, 0, 0, 0.3);
+    z-index: 5;
 }
 
 #financial-table th.sticky-col {
-    z-index: 11;
+    background-color: #f8f9fa;
+    z-index: 6;
 }
 
-#financial-table tbody tr {
-    transition: background 0.15s;
+#financial-table tbody tr:nth-child(even) {
+    background-color: #fafafa;
 }
 
-#financial-table tbody tr:hover td,
-#financial-table tbody tr:hover td.sticky-col {
-    background: var(--accent-color);
-    color: #ffffff;
-    font-weight: 600;
-    cursor: default;
+#financial-table tbody tr:hover td {
+    background-color: #f1f8e9;
 }
 
-#financial-table tbody tr:hover td.col-highlight {
-    background: var(--accent-color);
-    color: #ffffff;
-}
-
-#financial-table tbody tr:hover td.profit-neg {
-    color: #ffcccc !important; /* Lighter red for visibility on solid blue background */
-}
-
-/* Highlight for latest year (2025) */
-#financial-table th.col-highlight {
-    background: rgba(236, 72, 153, 0.15); /* pinkish highlight tying back to chart */
-    color: #fbcfe8; /* light pink text */
-}
-
-#financial-table td.col-highlight {
-    background: rgba(236, 72, 153, 0.08); /* very subtle pink background */
+.col-highlight {
+    background-color: #fff9c4 !important; /* Subtle yellow highlight for latest year */
 }
 
 .profit-neg {
-    color: var(--danger) !important;
+    color: #d32f2f !important;
 }
 
+/* Toast */
+.toast {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    background: #333;
+    color: #fff;
+    padding: 0.75rem 1.25rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    z-index: 100;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    body { padding: 0.75rem; }
+    .dashboard-header { padding: 1rem; }
+    .dashboard-header h1 { font-size: 1.4rem; }
+    .controls-section { flex-direction: column; gap: 1rem; align-items: flex-start; }
+    .view-toggle { width: 100%; display: flex; }
+    .view-btn { flex: 1; }
+    .chart-container { height: 350px; }
+}

@@ -198,19 +198,14 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function updateChart(labels, revenues, profits) {
         const ctx = document.getElementById('financialChart').getContext('2d');
-        const revGradient = ctx.createLinearGradient(0, 0, 0, 500);
-        revGradient.addColorStop(0, 'rgba(59, 130, 246, 0.9)');
-        revGradient.addColorStop(1, 'rgba(59, 130, 246, 0.1)');
-        const highlightRevGradient = ctx.createLinearGradient(0, 0, 0, 500);
-        highlightRevGradient.addColorStop(0, 'rgba(236, 72, 153, 0.9)'); 
-        highlightRevGradient.addColorStop(1, 'rgba(236, 72, 153, 0.1)');
         
-        const revColors = labels.map(l => l === '2025' ? highlightRevGradient : revGradient);
-        const profColors = labels.map(l => l === '2025' ? '#ec4899' : '#10b981');
+        // Excel-like colors: Green for Revenue, Grey/Dark for Profit
+        const revColor = '#217346'; // Excel Green
+        const profColor = '#444444'; // Dark Grey
         
         if (chartInstance) chartInstance.destroy();
-        Chart.defaults.color = '#94a3b8';
-        Chart.defaults.font.family = "'Inter', sans-serif";
+        Chart.defaults.color = '#666666';
+        Chart.defaults.font.family = "'Segoe UI', Tahoma, sans-serif";
         if (typeof ChartDataLabels !== 'undefined') Chart.register(ChartDataLabels);
         
         chartInstance = new Chart(ctx, {
@@ -222,25 +217,24 @@ document.addEventListener('DOMContentLoaded', () => {
                         type: 'line',
                         label: '영업이익',
                         data: profits,
-                        borderColor: '#10b981',
-                        backgroundColor: profColors,
-                        borderWidth: 3,
-                        pointBackgroundColor: '#0f172a',
-                        pointBorderColor: profColors,
-                        pointBorderWidth: 3,
-                        pointRadius: 6,
-                        pointHoverRadius: 8,
-                        tension: 0.4,
+                        borderColor: profColor,
+                        backgroundColor: profColor,
+                        borderWidth: 2,
+                        pointBackgroundColor: '#ffffff',
+                        pointBorderColor: profColor,
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        tension: 0, // Straight lines for professional look
                         yAxisID: 'y'
                     },
                     {
                         type: 'bar',
                         label: '매출액',
                         data: revenues,
-                        backgroundColor: revColors,
+                        backgroundColor: revColor,
                         borderColor: 'transparent',
-                        borderRadius: 8,
-                        barPercentage: 0.5,
+                        borderRadius: 0, // Square bars for Excel look
+                        barPercentage: 0.6,
                         yAxisID: 'y'
                     }
                 ]
@@ -254,18 +248,34 @@ document.addEventListener('DOMContentLoaded', () => {
                     datalabels: {
                         anchor: 'end',
                         align: 'end',
-                        color: (ctx) => ctx.dataset.type === 'line' ? '#10b981' : '#94a3b8',
-                        font: { size: 11, weight: 600 },
+                        color: '#444',
+                        font: { size: 10, weight: 600 },
                         formatter: (val) => val ? formatKoreanCurrency(val) : ''
                     },
-                    legend: { position: 'top', labels: { usePointStyle: true, padding: 20, font: { size: 14, weight: 600 } } },
+                    legend: { 
+                        position: 'top', 
+                        align: 'end',
+                        labels: { boxWidth: 12, padding: 20, font: { size: 12 } } 
+                    },
                     tooltip: {
                         enabled: false
                     }
                 },
                 scales: {
-                    x: { grid: { color: 'transparent' }, ticks: { font: { size: 13 } } },
-                    y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { callback: (val) => formatKoreanCurrency(val), font: { size: 12 } } }
+                    x: { 
+                        grid: { display: false }, 
+                        border: { color: '#ccc' },
+                        ticks: { font: { size: 12 } } 
+                    },
+                    y: { 
+                        beginAtZero: true, 
+                        border: { display: false },
+                        grid: { color: '#f0f0f0' }, 
+                        ticks: { 
+                            callback: (val) => formatKoreanCurrency(val), 
+                            font: { size: 11 } 
+                        } 
+                    }
                 }
             }
         });
