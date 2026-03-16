@@ -48,7 +48,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Force select the first company (most recent)
                 companySelect.value = companyDisplayOrder[0];
                 updateDashboard();
-                showToast('구글 스프레드시트 데이터를 최신 순으로 로드했습니다.');
             } else {
                 showToast('데이터를 불러오는 데 실패했습니다 (비어있음).', true);
             }
@@ -68,8 +67,9 @@ document.addEventListener('DOMContentLoaded', () => {
     btnChartView.addEventListener('click', () => {
         btnChartView.classList.add('active');
         btnTableView.classList.remove('active');
-        chartSection.style.display = 'flex';
+        chartSection.style.display = 'block';
         tableSection.style.display = 'none';
+        if (chartInstance) chartInstance.resize();
     });
 
     btnTableView.addEventListener('click', () => {
