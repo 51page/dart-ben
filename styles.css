@@ -129,6 +129,23 @@ body {
     font-weight: bold;
 }
 
+.visitor-stats-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 13px;
+    color: #444;
+}
+
+.stat-separator {
+    color: #ccc;
+}
+
+.stat-item span {
+    font-weight: 600;
+    color: var(--excel-green);
+}
+
 /* Main Content Area */
 .dashboard-container {
     flex: 1;
@@ -325,7 +342,7 @@ select {
 @media (max-width: 768px) {
     .excel-ribbon { padding: 10px; }
     .ribbon-controls { flex-direction: column; align-items: stretch; gap: 10px; }
-    .formula-bar { display: none; }
+    .formula-bar { display: flex; } /* Show formula bar on mobile as it now has stats */
     .summary-grid { margin: 10px; }
     .chart-cell-container { margin: 10px; height: 350px; padding: 10px; }
 }
