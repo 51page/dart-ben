@@ -245,11 +245,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         yAxisID: 'y',
                         datalabels: {
                             display: true,
-                            align: 'bottom',
+                            align: 'top',
                             anchor: 'end',
-                            offset: 10,
-                            color: '#FFFFFF',
-                            backgroundColor: 'rgba(50, 50, 50, 0.8)',
+                            offset: 4,
+                            color: '#444444',
+                            backgroundColor: 'rgba(255, 255, 255, 0.8)',
                             borderRadius: 3,
                             padding: 4,
                             font: { size: window.innerWidth < 768 ? 9 : 10, weight: 'bold' },
@@ -267,11 +267,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         yAxisID: 'y',
                         datalabels: {
                             display: true,
-                            align: 'top',
+                            align: 'bottom', // Move inside the bar
                             anchor: 'end',
                             offset: 5,
-                            color: '#333333',
-                            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                            color: '#FFFFFF',
+                            backgroundColor: 'rgba(0, 0, 0, 0.4)',
                             borderRadius: 3,
                             padding: 4,
                             font: { size: window.innerWidth < 768 ? 9 : 10, weight: 'bold' },
@@ -284,15 +284,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 responsive: true,
                 maintainAspectRatio: false,
                 interaction: { mode: 'index', intersect: false },
-                layout: { padding: { top: 60, bottom: 20, left: 10, right: 10 } },
+                layout: { padding: { top: 40, bottom: 20, left: 10, right: 10 } },
                 plugins: {
                     datalabels: {
-                        display: false // We are defining it per dataset for better control
+                        display: false 
                     },
                     legend: { 
                         position: 'top', 
-                        align: 'start',
-                        labels: { boxWidth: 12, padding: 30, font: { size: 12, weight: 'bold' } } 
+                        align: 'end', // Move legend to the right
+                        labels: { boxWidth: 12, padding: 20, font: { size: 12, weight: 'bold' } } 
                     },
                     tooltip: {
                         enabled: false
