@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const tableSection = document.getElementById('table-section');
     const btnChartView = document.getElementById('btn-chart-view');
     const btnTableView = document.getElementById('btn-table-view');
+    const dashboardTitle = document.getElementById('dashboard-title');
     
     // State
     // Adding a timestamp as a cache buster to ensure the latest data is fetched
@@ -62,6 +63,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Event Listeners
     companySelect.addEventListener('change', () => {
         updateDashboard();
+    });
+
+    dashboardTitle.addEventListener('click', () => {
+        window.location.reload();
     });
 
     btnChartView.addEventListener('click', () => {
