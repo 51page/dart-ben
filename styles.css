@@ -244,6 +244,15 @@ body {
     background-color: var(--selection-bg);
 }
 
+/* Company Grouping */
+.company-start-row td {
+    border-top: 2px solid #ccc !important;
+}
+
+.company-start-row .sticky-col {
+    color: var(--excel-green);
+}
+
 /* Control Elements */
 select {
     border: 1px solid var(--border-color);

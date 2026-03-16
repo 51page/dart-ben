@@ -326,44 +326,49 @@ document.addEventListener('DOMContentLoaded', () => {
         const thead = tableObj.querySelector('thead');
         const tbody = tableObj.querySelector('tbody');
         const companies = companyDisplayOrder;
-        const allYearsSet = new Set();
-        companies.forEach(c => Object.keys(financialData[c]).forEach(y => allYearsSet.add(y)));
-        let years = Array.from(allYearsSet).sort().reverse();
         
-        // Excel column headers (A, B, C...)
-        let trExcelCols = '<tr><th class="excel-col-label"></th><th class="excel-col-label">A</th>';
-        years.forEach((y, i) => {
-            const colIdx1 = String.fromCharCode(66 + (i * 2)); // B, D, F...
-            const colIdx2 = String.fromCharCode(67 + (i * 2)); // C, E, G...
-            trExcelCols += `<th colspan="2" class="excel-col-label">${colIdx1}:${colIdx2}</th>`;
-        });
-        trExcelCols += '</tr>';
-
-        let trHead1 = trExcelCols + '<tr><th class="excel-col-label">1</th><th rowspan="2" class="sticky-col">기업명</th>';
-        let trHead2 = '<tr><th class="excel-col-label">2</th>';
-        years.forEach(y => {
-            const hClass = y === '2025' ? ' class="col-highlight"' : '';
-            trHead1 += `<th colspan="2" style="text-align: center; border-bottom: 1px solid var(--grid-border);"${hClass}>${y}년</th>`;
-            trHead2 += `<th${hClass}>매출</th><th${hClass}>영업이익</th>`;
-        });
-        thead.innerHTML = trHead1 + '</tr>' + trHead2 + '</tr>';
+        // Excel column headers (A, B, C, D)
+        let headerHtml = `
+            <tr>
+                <th class="excel-col-label"></th>
+                <th class="excel-col-label">A</th>
+                <th class="excel-col-label">B</th>
+                <th class="excel-col-label">C</th>
+                <th class="excel-col-label">D</th>
+            </tr>
+            <tr>
+                <th class="excel-col-label">1</th>
+                <th class="sticky-col">기업명</th>
+                <th style="width: 100px; text-align: center;">연도</th>
+                <th style="text-align: right;">매출액</th>
+                <th style="text-align: right;">영업이익</th>
+            </tr>
+        `;
+        thead.innerHTML = headerHtml;
         
         let trsBody = '';
-        companies.forEach((company, idx) => {
+        let rowCounter = 2; // Starting from row 2 in Excel labels
+        
+        companies.forEach((company) => {
             const rowData = financialData[company];
-            const excelRowIdx = idx + 3;
-            let rowHtml = `<tr><td class="excel-col-label">${excelRowIdx}</td><td class="sticky-col">${company}</td>`;
-            years.forEach(y => {
-                const hClass = y === '2025' ? 'col-highlight' : '';
-                if (rowData[y]) {
-                    const pClass = rowData[y].prof < 0 ? 'profit-neg' : '';
-                    rowHtml += `<td class="${hClass}">${formatKoreanCurrency(rowData[y].rev)}</td>`;
-                    rowHtml += `<td class="${hClass} ${pClass}">${formatKoreanCurrency(rowData[y].prof) || '-'}</td>`;
-                } else {
-                    rowHtml += `<td class="${hClass}">-</td><td class="${hClass}">-</td>`;
-                }
+            // Sort years in descending order (2025, 2024...)
+            const years = Object.keys(rowData).filter(y => y >= '2021' && y <= '2025').sort().reverse();
+            
+            years.forEach((year, yIdx) => {
+                const isFirstYear = yIdx === 0;
+                const pClass = rowData[year].prof < 0 ? 'profit-neg' : '';
+                const rowClass = isFirstYear ? 'company-start-row' : '';
+                
+                trsBody += `
+                    <tr class="${rowClass}">
+                        <td class="excel-col-label">${rowCounter++}</td>
+                        <td class="sticky-col">${isFirstYear ? `<strong>${company}</strong>` : ''}</td>
+                        <td style="text-align: center; color: #666;">${year}년</td>
+                        <td style="text-align: right; font-variant-numeric: tabular-nums;">${formatKoreanCurrency(rowData[year].rev)}</td>
+                        <td style="text-align: right; font-variant-numeric: tabular-nums;" class="${pClass}">${formatKoreanCurrency(rowData[year].prof)}</td>
+                    </tr>
+                `;
             });
-            trsBody += rowHtml + '</tr>';
         });
         tbody.innerHTML = trsBody;
     }
