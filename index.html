@@ -134,24 +134,28 @@
 
                 // 1. Total Count: Increment if new session, else just get
                 if (!sessionStorage.getItem(sessionKey)) {
-                    totalData = await callApi(BASE_URL, true);
+                    const result = await callApi(BASE_URL, true);
+                    totalData = result.data.up_count;
                     sessionStorage.setItem(sessionKey, 'true');
                 } else {
-                    totalData = await callApi(BASE_URL);
+                    const result = await callApi(BASE_URL);
+                    totalData = result.data.up_count;
                 }
 
                 // 2. Today Count: Use a separate key/id for daily stats
                 const TODAY_URL = `https://api.counterapi.dev/v2/s-team-21-3316/today-${todayStr}`;
                 if (!sessionStorage.getItem(todaySessionKey)) {
-                    todayData = await callApi(TODAY_URL, true);
+                    const result = await callApi(TODAY_URL, true);
+                    todayData = result.data.up_count;
                     sessionStorage.setItem(todaySessionKey, 'true');
                 } else {
-                    todayData = await callApi(TODAY_URL);
+                    const result = await callApi(TODAY_URL);
+                    todayData = result.data.up_count;
                 }
 
-                // Update UI (Show actual values from API)
-                document.getElementById('visitor-today').textContent = Number(todayData.value).toLocaleString();
-                document.getElementById('visitor-total').textContent = Number(totalData.value).toLocaleString();
+                // Update UI (Starting from actual 0/1 counts)
+                document.getElementById('visitor-today').textContent = (totalData !== undefined ? Number(todayData) : 0).toLocaleString();
+                document.getElementById('visitor-total').textContent = (totalData !== undefined ? Number(totalData) : 0).toLocaleString();
 
             } catch (e) {
                 console.warn('CounterAPI Error:', e);
