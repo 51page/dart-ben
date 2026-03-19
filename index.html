@@ -50,9 +50,7 @@
         <div class="formula-input">
             <span class="fx-icon">fx</span>
             <div id="formula-display" class="visitor-stats-container">
-                <span class="stat-item">오늘의 방문자: <span id="visitor-today">0</span></span>
-                <span class="stat-separator">|</span>
-                <span class="stat-item">누적 방문자: <span id="visitor-total">0</span></span>
+                <a href="https://hits.sh/dart-ben.vercel.app/"><img alt="Hits" src="https://hits.sh/dart-ben.vercel.app.svg?view=today-total&style=flat-square&label=%EB%B0%A9%EB%AC%B8%EC%9E%90%20%EC%88%98&color=217346"/></a>
             </div>
         </div>
     </div>
@@ -110,61 +108,6 @@
     <!-- Application Logic -->
     <script src="app.js"></script>
     
-    <!-- Counter logic (CounterAPI V2 with Token) -->
-    <script>
-        async function updateVisitorCount() {
-            const API_TOKEN = 'ut_IbDpEZTy1sRCBKYAu6MeNoDsMBExzVVBGVKUtbCZ';
-            // User's specific counter link based on documentation
-            const BASE_URL = 'https://api.counterapi.dev/v2/s-team-21-3316/first-counter-3316';
-            
-            const todayStr = new Date().toISOString().slice(0, 10);
-            const sessionKey = 'counted_total_session';
-            const todaySessionKey = `counted_today_session_${todayStr}`;
 
-            async function callApi(url, isUp = false) {
-                const targetUrl = isUp ? `${url}/up` : url;
-                const response = await fetch(targetUrl, {
-                    headers: { 'Authorization': `Bearer ${API_TOKEN}` }
-                });
-                return await response.json();
-            }
-
-            try {
-                let totalData, todayData;
-
-                // 1. Total Count: Increment if new session, else just get
-                if (!sessionStorage.getItem(sessionKey)) {
-                    const result = await callApi(BASE_URL, true);
-                    totalData = result.data.up_count;
-                    sessionStorage.setItem(sessionKey, 'true');
-                } else {
-                    const result = await callApi(BASE_URL);
-                    totalData = result.data.up_count;
-                }
-
-                // 2. Today Count: Use a separate key/id for daily stats
-                const TODAY_URL = `https://api.counterapi.dev/v2/s-team-21-3316/today-${todayStr}`;
-                if (!sessionStorage.getItem(todaySessionKey)) {
-                    const result = await callApi(TODAY_URL, true);
-                    todayData = result.data.up_count;
-                    sessionStorage.setItem(todaySessionKey, 'true');
-                } else {
-                    const result = await callApi(TODAY_URL);
-                    todayData = result.data.up_count;
-                }
-
-                // Update UI (Starting from actual 0/1 counts)
-                document.getElementById('visitor-today').textContent = (totalData !== undefined ? Number(todayData) : 0).toLocaleString();
-                document.getElementById('visitor-total').textContent = (totalData !== undefined ? Number(totalData) : 0).toLocaleString();
-
-            } catch (e) {
-                console.warn('CounterAPI Error:', e);
-                document.getElementById('visitor-today').textContent = "425";
-                document.getElementById('visitor-total').textContent = "15,420";
-            }
-        }
-        
-        window.addEventListener('load', updateVisitorCount);
-    </script>
 </body>
 </html>
